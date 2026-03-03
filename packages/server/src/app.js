@@ -23,7 +23,7 @@ app.use(async (req, res, next) => {
   next();
 });
 
-const allowedOrigins = ['http://localhost:3001', 'https://yield-plum.vercel.app'];
+const allowedOrigins = ['http://localhost:3000', 'http://localhost:3001', 'https://yield-plum.vercel.app'];
 app.use(cors({
   origin: allowedOrigins,
   credentials: true,

@@ -60,7 +60,7 @@ function App() {
             <source media="(max-width: 768px)" srcSet={sleepingDragonMobile} />
             <img src={sleepingDragonLarge} alt="Sleeping dragon loading" className="loading-dragon" />
           </picture>
-          <h1 className="loading-text">Loading your treasuries...</h1>
+          <h1 className="loading-text">Loading your treasures...</h1>
         </div>
       ) : (
         <>

@@ -53,16 +53,39 @@
 
 .loading-text {
     position: absolute;
-    bottom: 80px;
+    bottom: 10vh;
     left: 0;
     width: 100%;
     text-align: center;
-    top: auto;
     z-index: 1;
-    text-shadow: 0 2px 6px rgba(0, 0, 0, 1);
-    color: white;
+    color: #fceea7;
+    font-family: 'Cinzel', 'Georgia', serif;
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    font-weight: 400;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    text-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.8),
+        0 0 10px rgba(252, 238, 167, 0.3);
     padding: 0 20px;
     box-sizing: border-box;
+    animation: goldPulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes goldPulse {
+    0% { 
+        opacity: 0.75; 
+        text-shadow: 
+            0 2px 4px rgba(0, 0, 0, 0.8),
+            0 0 10px rgba(252, 238, 167, 0.2); 
+    }
+    100% { 
+        opacity: 1; 
+        text-shadow: 
+            0 2px 6px rgba(0, 0, 0, 0.9),
+            0 0 20px rgba(252, 238, 167, 0.6),
+            0 0 30px rgba(252, 238, 167, 0.4); 
+    }
 }
 
 /* Opcional: remove possíveis scrollbars causadas por 100vw/100vh */

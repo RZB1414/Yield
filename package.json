@@ -9,6 +9,7 @@
     "packages/*"
   ],
   "scripts": {
+    "start": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:client": "npm run start --workspace=@personal-yield/client",
     "dev:server": "npm run dev --workspace=@personal-yield/server",
     "build:client": "npm run build --workspace=@personal-yield/client",
@@ -16,5 +17,9 @@
     "test:client": "npm run test --workspace=@personal-yield/client",
     "snapshot": "npm run snapshot --workspace=@personal-yield/server",
     "seed:snapshots": "npm run seed:snapshots --workspace=@personal-yield/server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0"
   }
 }
