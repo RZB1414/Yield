@@ -1,0 +1,242 @@
+.dividends-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--color-surface);
+    color: var(--color-text);
+    box-shadow: var(--shadow-sm);
+    border-radius: 8px;
+    padding: 16px 18px 20px;
+    transition: background .25s ease, color .25s ease, border-color .25s ease;
+}
+
+.dividends-title {
+    margin-top: 10px;
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+h1, h2, h3, button {
+    user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+h1, h2, h3, button, p, span {
+    user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
+.dividends-buttons {
+    display: flex;
+    justify-content: space-between;
+    width: 95%;
+    margin-top: 10px;
+}
+
+.dividends-button {
+    background: var(--chart-quantity-line);
+    color: var(--color-text-inverse);
+    border: 1px solid var(--color-primary);
+    border-radius: 6px;
+    padding: 8px 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: background .2s ease, color .2s ease, border-color .2s ease, transform .15s ease;
+}
+
+.dividends-button:hover {
+    background: var(--color-primary-hover);
+    border-color: var(--color-primary-hover);
+}
+
+.dividends-button:active {
+    transform: translateY(1px);
+}
+
+.dividends-year-filter {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+/* Escopado ao componente para não vazar para outros */
+.dividends-container label {
+    color: var(--color-text-secondary);
+    font-size: 0.85rem;
+    margin: 8px 8px 8px 0;
+    font-weight: 500;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+}
+
+.dividends-container select {
+    padding: 6px 8px;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    margin-right: 8px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-alt);
+    color: var(--color-text);
+    transition: background .25s ease, color .25s ease, border-color .25s ease;
+}
+
+.dividends-container select:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(58,123,255,0.35);
+}
+
+.dividends-byyear-button {
+    background: var(--color-accent);
+    color: var(--color-text-inverse);
+    border: 1px solid var(--color-accent);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: .5px;
+    transition: background .2s ease, border-color .2s ease, transform .15s ease;
+}
+
+.dividends-byyear-button:hover {
+    background: var(--color-accent-hover);
+    border-color: var(--color-accent-hover);
+}
+
+.dividends-byyear-button:active { transform: translateY(1px); }
+
+.dividends-total  {
+    font-size: 25px;
+    font-weight: 600;
+}
+
+
+.dividends-detailed {
+    display: flex;
+    justify-content: end;
+    width: 95%;
+}
+
+.dividends-detailed-button {
+    background: var(--color-surface-alt);
+    color: var(--color-text);
+    font-weight: 400;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin: 15px 0 0 10px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: background .2s ease, color .2s ease, border-color .2s ease, transform .15s ease;
+}
+
+.dividends-detailed-button:hover {
+    background: var(--color-surface);
+    border-color: var(--color-primary);
+}
+
+.dividends-detailed-button:active { transform: translateY(1px); }
+
+.dividends-list {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    list-style: none;
+    padding: 0;
+    margin: 5px;
+}
+
+.dividends-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--color-divider);
+    font-size: 0.85rem;
+    transition: background .15s ease;
+}
+
+.dividends-list-item:hover { background: var(--color-surface-alt); }
+
+.dividends-list-item-ticker {
+    width: 150px;
+    color: var(--color-text);
+    font-weight: 500;
+    letter-spacing: .5px;
+}
+
+.dividends-list-item-liquidacao { color: var(--color-text-muted); }
+
+.dividends-list-item-valor {
+    color: var(--color-success);
+    font-weight: 600;
+}
+
+.dividends-simplelist-ticker {
+    color: var(--color-text);
+    font-weight: 500;
+    letter-spacing: .5px;
+}
+
+.dividends-simplelist-valor {
+    color: var(--color-success);
+    font-weight: 600;
+}
+
+.dividends-no-data {
+    font-size: 1rem;
+    color: var(--color-text-muted);
+    text-align: center;
+    margin-top: 20px;
+}
+
+.overall-date {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+    letter-spacing: .5px;
+    margin-top: 4px;
+}
+
+.dividends-broker-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 4px;
+    fill: var(--color-text-secondary);
+    transition: fill .25s ease, transform .25s ease;
+}
+
+.dividends-broker-icon:hover { fill: var(--color-primary); }
+.dividends-broker-icon:active { transform: scale(.92); }
+
+.dividends-broker-select {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    margin-top: 12px;
+    background: var(--color-surface-alt);
+    padding: 6px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+}
+
+.dividends-combined-total {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 6px 0 12px 0;
+    color: var(--color-text-secondary);
+}

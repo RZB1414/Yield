@@ -1,0 +1,15 @@
+.theme-toggle-btn {
+  width: 35px;
+  height: 35px;
+  color: var(--color-text);
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+
+.theme-toggle-btn:active {
+  transform: translateY(1px);
+}

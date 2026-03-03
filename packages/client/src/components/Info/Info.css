@@ -1,0 +1,37 @@
+/* Info component dark theme styling */
+
+/* Prevent selection on headings/buttons */
+h1, h2, h3, button, p, span { user-select: none; -webkit-user-select: none; -ms-user-select: none; }
+
+.dividends-container { padding: 0; max-width: 100%; overflow-x: auto; }
+.dividends-title { text-align: center; font-size: 28px; margin-bottom: 20px; font-weight: 600; color: var(--color-text); }
+
+.year-selector { width: 100%; background: var(--color-bg); text-align: center; padding: 12px 0px; border: 1px solid var(--color-border); border-radius: 8px; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+.year-selector label { font-size: 16px; background: transparent; color: var(--color-text-secondary); font-weight: 500; }
+.year-select { background: var(--color-surface); font-size: 16px; border: 1px solid var(--color-border); border-radius: 6px; cursor: pointer; padding: 6px 10px; color: var(--color-text); }
+
+.table-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+.stocks-table { min-width: 100%; font-size: 16px; text-align: left; border-collapse: collapse; box-shadow: var(--shadow-sm); }
+.stocks-table th, .stocks-table td { border: 1px solid var(--color-border); padding: 8px 10px; white-space: nowrap; }
+.stocks-table th { background: var(--color-surface-alt); font-weight: 600; color: var(--color-text); position: sticky; top: 0; z-index: 2; }
+.stocks-table tr:nth-child(even) { background: rgba(255,255,255,0.03); }
+.stocks-table tr:hover { background: rgba(255,255,255,0.06); }
+.sticky-column { position: sticky; left: 0; background: var(--color-surface-alt); z-index: 3; }
+
+.month-cell { white-space: nowrap; text-align: left; }
+.month-cell-total { font-weight: 600; background: var(--color-surface-alt); white-space: nowrap; }
+
+.dividends-no-data { text-align: center; color: var(--color-text-muted); font-size: 18px; margin: 30px 0; }
+
+.cards-of-month-container { display: flex; justify-content: center; align-items: flex-start; margin-top: 20px; }
+.cards-of-month { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 8px; box-shadow: var(--shadow-sm); padding: 24px 32px 16px; min-width: 280px; max-width: 90vw; position: relative; color: var(--color-text); }
+.cards-of-month h2 { font-size: 20px; margin-bottom: 16px; text-align: center; font-weight: 600; }
+.cards-of-month ul { list-style: none; padding: 0; margin: 0 0 12px 0; }
+.cards-of-month li { display: flex; align-items: center; font-size: 16px; margin-bottom: 8px; color: var(--color-text); }
+
+.close-icon { position: absolute; top: 10px; right: 10px; width: 20px; height: 20px; cursor: pointer; fill: var(--color-text-secondary); transition: fill .2s; }
+.close-icon:hover { fill: var(--color-danger); }
+
+.delete-cardicon { margin-left: 20px; width: 24px; height: 24px; cursor: pointer; color: var(--color-text-secondary); transition: fill .2s; }
+.delete-cardicon:hover { color: var(--color-danger); }

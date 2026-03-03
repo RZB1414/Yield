@@ -1,0 +1,438 @@
+/* Stocks component dark theme */
+
+.stocks-container {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.stocks-container-title {
+    font-size: 28px;
+    font-weight: 600;
+    margin: 10px 0 0;
+    text-align: center;
+    user-select: none;
+    color: var(--color-text);
+}
+
+.stocks-list-wrapper {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    width: 100%;
+}
+
+.stocks-list-title-USD {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 15px 0;
+    text-align: center;
+    color: var(--color-text);
+}
+
+.stocks-list-title-BRL {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 15px 0;
+    text-align: center;
+    color: var(--color-text);
+}
+
+.search-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 10px 0;
+    width: 100%;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.close-search-stock-icon {
+    width: 25px;
+    height: 25px;
+    margin-right: 10px;
+    cursor: pointer;
+    fill: var(--color-text-secondary);
+    transition: fill .2s;
+}
+
+.search-input {
+    width: 300px;
+    max-width: 55%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    font-size: 16px;
+    background: var(--color-surface-alt);
+    color: var(--color-text);
+}
+
+.search-input:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.search-input-button,
+.update-values-button {
+    padding: 10px 20px;
+    margin: 10px;
+    border-radius: 6px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    background: var(--chart-quantity-line);
+    color: var(--color-text-inverse);
+    font-weight: 500;
+    transition: background .2s;
+}
+
+.search-input-button:hover,
+.update-values-button:hover {
+    background: var(--color-primary-hover);
+}
+
+.no-stocks-message {
+    font-size: 18px;
+    color: var(--color-text-muted);
+    text-align: center;
+    margin-top: 20px;
+}
+
+.stock-edit {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    background: var(--color-surface);
+    margin-top: 10px;
+    padding: 12px 16px 20px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+    max-width: 900px;
+}
+
+.average-price-input,
+.stock-quantity-input {
+    width: 160px;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    font-size: 16px;
+    background: var(--color-surface-alt);
+    color: var(--color-text);
+}
+
+.updating-values {
+    padding: 10px;
+    font-size: 14px;
+    color: var(--color-text-secondary);
+}
+
+/* Table */
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-top: 16px;
+}
+
+.stocks-table {
+    min-width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    text-align: left;
+}
+
+.stocks-table th,
+.stocks-table td {
+    border: 1px solid var(--color-border);
+    padding: 8px 10px;
+    white-space: nowrap;
+}
+
+.stocks-table td {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stocks-table th {
+    background: var(--color-surface-alt);
+    font-weight: 600;
+    color: var(--color-text);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.stocks-table tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.stocks-table tr:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.sticky-column {
+    position: sticky;
+    left: 0;
+    background: var(--color-surface-alt);
+    z-index: 3;
+}
+
+.stock-data {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 20%;
+    gap: 10px;
+    padding: 15px;
+    background-color: var(--color-surface-alt);
+}
+
+.stock-data-close-addIcon {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.stock-data-price {
+    font-size: 20px;
+    font-weight: 400;
+    margin: 5px;
+}
+
+.footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    padding: 10px;
+    background: var(--color-surface-alt);
+    color: var(--color-text-secondary);
+}
+
+/* Icons */
+.search-icon {
+    width: 40px;
+    height: 40px;
+    margin-left: auto;
+    margin-right: 10px;
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    transition: fill .2s;
+}
+
+.delete-icon {
+    width: 30px;
+    height: 30px;
+    margin-left: auto;
+    margin-right: 7px;
+    margin-top: 10px;
+    cursor: pointer;
+    fill: var(--color-text-secondary);
+    transition: fill .2s;
+}
+
+.close-search-icon {
+    width: 25px;
+    height: 25px;
+    margin-left: auto;
+    margin-right: 10px;
+    cursor: pointer;
+    fill: var(--color-text-secondary);
+    transition: fill .2s;
+}
+
+.search-icon:hover,
+.delete-icon:hover,
+.close-search-icon:hover {
+    fill: var(--color-primary);
+}
+
+.stock-data-closeIcon {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    transition: fill .2s;
+}
+
+.stock-data-addIcon {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    transition: fill .2s;
+}
+
+.edit-columns-icon {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    transition: all .2s;
+    margin-left: 8px;
+    stroke: var(--color-text-secondary);
+    /* Garante que o stroke use a cor correta */
+}
+
+.edit-columns-icon:hover {
+    color: var(--color-primary);
+    stroke: var(--color-primary);
+    transform: scale(1.1);
+}
+
+/* Edit Columns Modal */
+.edit-columns-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.edit-columns-modal {
+    background-color: var(--color-surface);
+    padding: 24px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    max-height: 80vh;
+    border: 1px solid var(--color-border);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+}
+
+.edit-columns-modal h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: var(--color-text);
+    text-align: center;
+}
+
+.columns-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.column-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: var(--color-surface-alt);
+    margin-bottom: 8px;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+}
+
+.column-label {
+    font-weight: 500;
+    color: var(--color-text);
+}
+
+.column-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.move-btn {
+    background: none;
+    border: none;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    padding: 4px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.move-btn:hover:not(:disabled) {
+    background-color: var(--color-bg);
+    color: var(--color-primary);
+}
+
+.move-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid var(--color-border);
+}
+
+.save-btn,
+.cancel-btn,
+.reset-btn {
+    padding: 10px 16px;
+    border-radius: 6px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    flex: 1;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.save-btn {
+    background-color: var(--chart-price-line);
+    color: #fff;
+}
+
+.save-btn:hover {
+    background-color: #00b341;
+}
+
+.cancel-btn {
+    background-color: var(--color-surface-alt);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+}
+
+.cancel-btn:hover {
+    background-color: var(--color-bg);
+}
+
+.reset-btn {
+    background-color: transparent;
+    color: var(--color-text-secondary);
+    border: 1px solid transparent;
+}
+
+.reset-btn:hover {
+    color: var(--color-danger);
+    background-color: rgba(255, 0, 0, 0.1);
+}
+
+/* Utility */
+h1,
+h2,
+h3,
+button,
+p,
+span {
+    user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}

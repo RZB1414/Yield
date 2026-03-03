@@ -1,0 +1,261 @@
+.add-data-container {
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+    color: var(--color-text);
+}
+
+.add-data-container h2 {
+    text-align: left;
+    margin-bottom: 10px;
+    font-size: 24px;
+    color: var(--color-text);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;    
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: var(--color-text-secondary);
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    font-size: 16px;
+    background-color: var(--color-surface-alt);
+    color: var(--color-text);
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+}
+.form-group input:focus { border-color: var(--color-primary); }
+
+/* -------- Date Input Theming -------- */
+/* Estilo base específico para o campo de data (mantém coerência visual) */
+.form-group input[type="date"] {
+    position: relative;
+    padding-right: 38px; /* espaço para ícone */
+    line-height: 1.2;
+}
+
+/* Remove appearance nativa (principalmente Firefox) onde possível */
+.form-group input[type="date"]::-moz-focus-inner { border: 0; }
+.form-group input[type="date"]::-webkit-datetime-edit-fields-wrapper { padding: 0; }
+.form-group input[type="date"]::-webkit-datetime-edit-text { color: var(--color-text-muted); }
+.form-group input[type="date"]::-webkit-datetime-edit-year-field,
+.form-group input[type="date"]::-webkit-datetime-edit-month-field,
+.form-group input[type="date"]::-webkit-datetime-edit-day-field { color: var(--color-text); }
+
+/* Ícone do calendário (WebKit) */
+.form-group input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    filter: drop-shadow(0 0 2px rgba(0,0,0,0.25));
+    opacity: .85;
+    transition: opacity .2s ease, transform .2s ease, filter .25s ease;
+    /* Usa máscara/svg interno do user agent; para controlar cor utilizamos invert + sepia em dark */
+}
+
+/* Ajuste de cor para dark mode usando filtros (limitação de customização do ícone nativo) */
+:root[data-theme='dark'] .form-group input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(.9) sepia(0) saturate(.5) hue-rotate(0deg) brightness(1.05) contrast(0.9);
+}
+
+.form-group input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; transform: scale(1.05); }
+.form-group input[type="date"]::-webkit-calendar-picker-indicator:active { transform: scale(.92); }
+
+/* Fallback: adiciona um pseudo-ícone (para navegadores que não exibem o indicador ou se quisermos sobrepor) */
+.form-group.date-field { position: relative; }
+.form-group.date-field::after {
+    content: '\1F4C5'; /* emoji calendário como fallback */
+    position: absolute;
+    top: 37px; /* ajustado em relação ao fluxo atual (label + input) */
+    right: 12px;
+    font-size: 18px;
+    pointer-events: none;
+    color: var(--color-text-secondary);
+    opacity: .65;
+    transition: opacity .2s ease;
+}
+:root[data-theme='dark'] .form-group.date-field::after { opacity: .8; }
+.form-group.date-field:focus-within::after { opacity: 1; }
+
+.add-transaction-button {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--chart-quantity-line);
+    color: var(--color-text-inverse);
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.add-transaction-button:hover { background-color: var(--color-primary-hover); }
+
+.close-card-icon {
+    width: 20px;
+    height: 20px;
+    margin-left: auto;
+}
+
+.bank-select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    font-size: 16px;
+    background-color: var(--color-surface-alt);
+    color: var(--color-text);
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+.currency-select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    font-size: 16px;
+    background-color: var(--color-surface-alt);
+    color: var(--color-text);
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+.file-upload-container {
+    margin-top: 20px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.file-upload-label {
+    box-sizing: border-box;
+    width: 60%;
+    padding: 10px 20px;
+    background-color: var(--chart-quantity-line);
+    color: var(--color-text-inverse);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    margin-bottom: 10px;
+}
+.file-upload-label:hover { background-color: var(--color-primary-hover); }
+
+.file-upload-input {
+    display: none; /* Esconde o input padrão */
+}
+
+.upload-file-button {
+    box-sizing: border-box;
+    padding: 10px 20px;
+    background-color: var(--color-primary);
+    width: 60%;
+    color: var(--color-text-inverse);
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.upload-file-button:hover { background-color: var(--color-primary-hover); }
+
+.upload-file-button:disabled {
+    background-color: var(--color-border);
+    cursor: not-allowed;
+}
+
+.file-upload-closebutton {
+    margin-left: auto;
+}
+
+.file-upload-password-input {
+    width: 60%;
+    padding: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: border-box;
+    background: var(--color-surface-alt);
+    color: var(--color-text);
+}
+
+.loader-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.loader-message {
+    font-size: 20px;
+    color: var(--color-text-secondary);
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.broker-select-name {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+}
+
+.broker-select-add {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    font-size: 16px;
+    background-color: var(--color-surface-alt);
+    color: var(--color-text);
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+    margin-top: 5px;
+    margin-bottom: 15px;
+}
+
+/* HTML: <div class="loader"></div> */
+.loader {
+    /* Usa cor de destaque temática */
+    --loader-color: var(--color-accent);
+    --c:no-repeat linear-gradient(var(--loader-color) 0 0);
+    background:
+        var(--c),var(--c),var(--c),
+        var(--c),var(--c),var(--c),
+        var(--c),var(--c),var(--c);
+    background-size: 16px 16px;
+    animation:
+        l32-1 1s infinite,
+        l32-2 1s infinite;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,.35));
+    transition: filter .3s ease;
+}
+:root[data-theme='dark'] .loader { filter: drop-shadow(0 2px 4px rgba(0,0,0,.6)); }
+@keyframes l32-1 {
+  0%,100% {width:45px;height: 45px}
+  35%,65% {width:65px;height: 65px}
+}
+@keyframes l32-2 {
+  0%,40%  {background-position: 0 0,0 50%, 0 100%,50% 100%,100% 100%,100% 50%,100% 0,50% 0,  50% 50% }
+  60%,100%{background-position: 0 50%, 0 100%,50% 100%,100% 100%,100% 50%,100% 0,50% 0,0 0,  50% 50% }
+}

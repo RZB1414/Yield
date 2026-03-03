@@ -1,0 +1,135 @@
+/* Página de autenticação (login / sign up) */
+.auth-page {
+    position: relative;
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    background: radial-gradient(circle at 30% 25%, rgba(70,90,140,0.18), transparent 62%), linear-gradient(160deg, #0b0f17 0%, #12161f 60%, #0d1016 100%);
+    overflow: hidden;
+}
+
+.app-brand {
+    font-size: 1.7rem;
+    font-weight: 700;
+    letter-spacing: .4px;
+    margin: 30px 0 90px;
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0,0,0,.55);
+}
+
+.auth-card-wrapper {
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+/* Formulário unificado */
+.auth-form {
+    /* Fundo removido conforme solicitado */
+    background: transparent;
+    border-radius: 14px;
+    padding: 46px 38px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    position: relative;
+    backdrop-filter: blur(4px);
+}
+
+.auth-title { 
+    font-size: 1.6rem; 
+    font-weight: 700; 
+    text-align: center; 
+    margin: 0 0 0; 
+    color: #fff; 
+}
+
+.field-group { display: flex; flex-direction: column; gap: 6px; }
+
+.input-wrapper {
+    background: rgba(38,44,53,0.55);
+    border: 1px solid #303742;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    height: 52px;
+    gap: 10px;
+    transition: border .25s, background .25s;
+}
+.input-wrapper:focus-within { border-color: var(--color-primary); background: rgba(48,55,65,0.75); }
+
+.input-icon { font-size: 1.1rem; opacity: .75; }
+.input-icon img { display: block; width: 20px; height: 20px; filter: brightness(0.9) saturate(0.9); }
+
+.text-input {
+    flex: 1;
+    height: 100%;
+    border: none;
+    background: transparent;
+    color: #dfe5ec;
+    font-size: 1rem;
+    letter-spacing: .4px;
+    outline: none;
+}
+.text-input::placeholder { color: #818a95; }
+
+/* Evita fundo branco em autofill (Chrome / Edge) */
+.text-input:-webkit-autofill,
+.text-input:-webkit-autofill:hover,
+.text-input:-webkit-autofill:focus,
+.text-input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px rgba(38,44,53,0.55) inset !important;
+    box-shadow: 0 0 0 1000px rgba(38,44,53,0.55) inset !important;
+    -webkit-text-fill-color: #dfe5ec !important;
+    caret-color: #dfe5ec !important;
+    transition: background-color 9999s ease-in-out 0s;
+}
+
+.input-wrapper:focus-within .text-input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px rgba(48,55,65,0.75) inset !important;
+    box-shadow: 0 0 0 1000px rgba(48,55,65,0.75) inset !important;
+}
+
+.form-extras { display: flex; justify-content: flex-end; margin-top: -6px; }
+.forgot-link { background: none; border: none; padding: 0; font-size: 0.78rem; color: #4d89ff; cursor: pointer; transition: color .2s; }
+.forgot-link:hover { color: #6ea0ff; }
+
+.primary-button {
+    background: #3a79ff;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    height: 54px;
+    font-size: .95rem;
+    font-weight: 600;
+    letter-spacing: .4px;
+    cursor: pointer;
+    box-shadow: 0 6px 16px -4px rgba(42,112,255,0.55), 0 2px 4px -1px rgba(0,0,0,0.5);
+    transition: background .25s, transform .15s;
+}
+.primary-button:hover { background: #3471f5; }
+.primary-button:active { transform: translateY(1px); }
+
+.form-message { text-align: center; font-size: .8rem; margin: -8px 0 0; }
+
+.auth-toggle { margin-top: 48px; font-size: 0.82rem; color: #8b95a3; }
+.link-button { background: none; border: none; padding: 0; color: #4d89ff; cursor: pointer; font: inherit; font-weight: 500; }
+.link-button:hover { color: #6ea0ff; }
+
+@media (max-height: 760px) {
+    .app-brand { margin-bottom: 48px; }
+    .auth-form { padding: 40px 32px 36px; gap: 20px; }
+    .auth-toggle { margin-top: 40px; }
+}
+
+@media (max-width: 520px) {
+    .auth-form { padding: 40px 26px 36px; }
+    .app-brand { font-size: 1.9rem; }
+    .auth-toggle { margin-top: 40px; }
+}

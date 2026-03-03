@@ -1,0 +1,91 @@
+/* Impede seleção de texto globalmente em títulos, botões, parágrafos e spans */
+h1, h2, h3, button, p, span {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -ms-user-select: none !important;
+}
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* THEME VARIABLES */
+:root[data-theme='light'] {
+  --color-bg: #F7F9FC;
+  --color-surface: #FFFFFF;
+  --color-surface-alt: #F0F3F7;
+  --color-border: #D9E0E8;
+  --color-divider: #E4E9EF;
+  --color-text: #1E2430;
+  --color-text-secondary: #4A5563;
+  --color-text-muted: #6B7480;
+  --color-text-inverse: #FFFFFF;
+  --color-primary: #0A6CF1;
+  --color-primary-hover: #0859C5;
+  --color-accent: #7856FF;
+  --color-accent-hover: #6141E6;
+  --color-success: #1E8F4B;
+  --color-danger: #D0342C;
+  --color-warning: #C88700;
+  --color-info: #2E74C6;
+  --chart-quantity-line: #4A63D4;
+  --chart-price-line: #2BAA84;
+  --chart-grid: #E2E8F0;
+  --chart-reference-hover: #FF9800;
+  --chart-reference-selected: #D0342C;
+  --chart-tooltip-bg: #FFFFFF;
+  --chart-tooltip-border: #CBD5E1;
+  --chart-tooltip-text: #1E2430;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04);
+}
+
+:root[data-theme='dark'] {
+  --color-bg: #131419;
+  --color-surface: #1E1F25;
+  --color-surface-alt: #24262E;
+  --color-border: #2C2D35;
+  --color-divider: #34363F;
+  --color-text: #F5F7FA;
+  --color-text-secondary: #C2C8D2;
+  --color-text-muted: #9096A1;
+  --color-text-inverse: #FFFFFF;
+  --color-primary: #3A7BFF;
+  --color-primary-hover: #2D62CC;
+  --color-accent: #8B6CFF;
+  --color-accent-hover: #6B4FE0;
+  --color-success: #4FBF72;
+  --color-danger: #FF5C58;
+  --color-warning: #E5B638;
+  --color-info: #54A6F8;
+  --chart-quantity-line: #8884d8;
+  --chart-price-line: #2BAA84;
+  --chart-grid: #2F323A;
+  --chart-reference-hover: #FF9800;
+  --chart-reference-selected: #FF5C58;
+  --chart-tooltip-bg: #262830;
+  --chart-tooltip-border: #383C45;
+  --chart-tooltip-text: #F5F7FA;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  transition: background .25s ease, color .25s ease;
+}
