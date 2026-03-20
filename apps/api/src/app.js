@@ -5,6 +5,133 @@ import cookieParser from 'cookie-parser';
 import { corsOptions } from './config/cors.js';
 
 const app = express();
+const MAX_REQUEST_BODY_BYTES = 10000 * 1024 * 1024;
+
+function parseUrlEncodedBody(value) {
+  const params = new URLSearchParams(value);
+  const parsed = {};
+
+  for (const [key, paramValue] of params.entries()) {
+    if (Object.prototype.hasOwnProperty.call(parsed, key)) {
+      const currentValue = parsed[key];
+      parsed[key] = Array.isArray(currentValue)
+        ? [...currentValue, paramValue]
+        : [currentValue, paramValue];
+      continue;
+    }
+
+    parsed[key] = paramValue;
+  }
+
+  return parsed;
+}
+
+function requestBodyParser(req, res, next) {
+  if (req.body !== undefined) {
+    next();
+    return;
+  }
+
+  const method = req.method?.toUpperCase();
+  if (method === 'GET' || method === 'HEAD' || method === 'OPTIONS') {
+    req.body = {};
+    next();
+    return;
+  }
+
+  const contentTypeHeader = req.headers['content-type'] ?? '';
+  const contentType = contentTypeHeader.split(';')[0].trim().toLowerCase();
+  const shouldParseJson = contentType === 'application/json';
+  const shouldParseForm = contentType === 'application/x-www-form-urlencoded';
+
+  if (!shouldParseJson && !shouldParseForm) {
+    req.body = {};
+    next();
+    return;
+  }
+
+  let completed = false;
+  let totalBytes = 0;
+  const chunks = [];
+
+  const abort = (statusCode, payload) => {
+    if (completed) {
+      return;
+    }
+
+    completed = true;
+    req.removeListener('data', onData);
+    req.removeListener('end', onEnd);
+    req.removeListener('error', onError);
+
+    if (!res.headersSent) {
+      res.status(statusCode).json(payload);
+    }
+  };
+
+  const onError = (error) => {
+    if (completed) {
+      return;
+    }
+
+    completed = true;
+    req.removeListener('data', onData);
+    req.removeListener('end', onEnd);
+    req.removeListener('error', onError);
+    next(error);
+  };
+
+  const onData = (chunk) => {
+    if (completed) {
+      return;
+    }
+
+    const bufferChunk = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    totalBytes += bufferChunk.length;
+
+    if (totalBytes > MAX_REQUEST_BODY_BYTES) {
+      abort(413, { error: 'Request body is too large.' });
+      if (typeof req.destroy === 'function') {
+        req.destroy();
+      }
+      return;
+    }
+
+    chunks.push(bufferChunk);
+  };
+
+  const onEnd = () => {
+    if (completed) {
+      return;
+    }
+
+    completed = true;
+    req.removeListener('data', onData);
+    req.removeListener('end', onEnd);
+    req.removeListener('error', onError);
+
+    const rawBody = Buffer.concat(chunks).toString('utf8');
+
+    if (!rawBody) {
+      req.body = {};
+      next();
+      return;
+    }
+
+    try {
+      req.body = shouldParseJson ? JSON.parse(rawBody) : parseUrlEncodedBody(rawBody);
+      next();
+    } catch {
+      if (!res.headersSent) {
+        res.status(400).json({ error: 'Invalid request body.' });
+      }
+    }
+  };
+
+  req.on('data', onData);
+  req.on('end', onEnd);
+  req.on('error', onError);
+}
 
 // Middleware para garantir conexão com o banco em cada request (serverless friendly)
 import { dbConnection, connection } from './config/dbConnect.js';
@@ -27,8 +154,7 @@ app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 
 // Middleware para parsing de JSON e URL-encoded
-app.use(express.json({ limit: '10000mb' })); // Aumenta o limite de tamanho do JSON
-app.use(express.urlencoded({ extended: true }));
+app.use(requestBodyParser);
 // Middleware para parsing de cookies
 app.use(cookieParser());
 

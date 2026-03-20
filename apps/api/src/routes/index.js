@@ -1,4 +1,3 @@
-import express from 'express'
 import stocks from './stocksRoutes.js'
 import brokers from './brokersRoutes.js'
 import totalValueBrokers from './totalValueBrokersRoutes.js'
@@ -13,7 +12,7 @@ const routes = (app) => {
         'Yield. Management system.'
     ))
 
-    app.use(express.json(), stocks, brokers, totalValueBrokers, encryptedDividends, users, creditCards, btgDividends, snapshots)
+    app.use(stocks, brokers, totalValueBrokers, encryptedDividends, users, creditCards, btgDividends, snapshots)
 }
 
 export default routes

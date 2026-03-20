@@ -1,4 +1,4 @@
-name = "personal-yield-api"
+name = "yield"
 main = "worker.js"
 account_id = "a928f4bf274d697272e1ddf90cb49798"
 workers_dev = true
