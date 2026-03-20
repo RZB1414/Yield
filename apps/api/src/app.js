@@ -1,10 +1,8 @@
 import express from 'express';
 import routes from './routes/index.js';
 import cors from 'cors';
-import { encryptedDividends } from './models/EncryptedDividends.js';
-import { btgDividends } from './models/BtgDividends.js';
-import { Snapshot } from './models/Snapshot.js';
 import cookieParser from 'cookie-parser';
+import { corsOptions } from './config/cors.js';
 
 const app = express();
 
@@ -23,21 +21,10 @@ app.use(async (req, res, next) => {
   next();
 });
 
-const allowedOrigins = ['http://localhost:3000', 'http://localhost:3001', 'https://yield-plum.vercel.app'];
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true,
-  methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  exposedHeaders: ['Set-Cookie'],
-  maxAge: 300
-}));
+app.use(cors(corsOptions));
 
 // Opcional: responder manualmente a OPTIONS para garantir CORS em serverless
-app.options('*', cors({
-  origin: allowedOrigins,
-  credentials: true
-}));
+app.options('*', cors(corsOptions));
 
 // Middleware para parsing de JSON e URL-encoded
 app.use(express.json({ limit: '10000mb' })); // Aumenta o limite de tamanho do JSON
@@ -54,25 +41,6 @@ app.use((req, res, next) => {
   });
   next();
 });
-
-// Sincronização dos índices do modelo 'dividend' e exibição dos índices atuais
-(async () => {
-  try {
-    await encryptedDividends.syncIndexes(); // Sincroniza os índices com o banco de dados
-    const indexes = await encryptedDividends.collection.getIndexes();
-
-    await btgDividends.syncIndexes(); // Sincroniza os índices com o banco de dados
-    const btgIndexes = await btgDividends.collection.getIndexes();
-
-    await Snapshot.syncIndexes(); // Sincroniza os índices com o banco de dados
-    const snapshotIndexes = await Snapshot.collection.getIndexes();
-
-
-    console.log("Índices sincronizados com sucesso! Índices atuais:", indexes, btgIndexes, snapshotIndexes);
-  } catch (error) {
-    console.error("Erro ao sincronizar os índices:", error);
-  }
-})();
 
 // Rotas
 routes(app);

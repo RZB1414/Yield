@@ -1,0 +1,9 @@
+name = "personal-yield-api"
+main = "worker.js"
+account_id = "a928f4bf274d697272e1ddf90cb49798"
+workers_dev = true
+compatibility_date = "2026-03-20"
+compatibility_flags = ["nodejs_compat", "nodejs_compat_populate_process_env"]
+
+[vars]
+CORS_ALLOWED_ORIGINS = "http://localhost:3001"

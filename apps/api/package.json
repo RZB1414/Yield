@@ -9,7 +9,11 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
     "snapshot": "node ./scripts/runSnapshot.js",
-    "seed:snapshots": "node ./scripts/seedSnapshots.js"
+    "seed:snapshots": "node ./scripts/seedSnapshots.js",
+    "cf:dev": "wrangler dev --config wrangler.toml",
+    "cf:deploy": "wrangler deploy --config wrangler.toml",
+    "cf:tail": "wrangler tail --config wrangler.toml",
+    "cf:secret": "wrangler secret put"
   },
   "author": "Renan Buiatti",
   "license": "ISC",

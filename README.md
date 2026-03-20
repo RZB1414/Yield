@@ -1,106 +1,133 @@
-# 📊 Personal Yield
+# Personal Yield
 
-A full-stack application for managing investment returns, dividends, and financial assets — built by a professional athlete who needed a tool to track finances across multiple countries, banks, and currencies.
+Full-stack application for portfolio tracking, dividends and investment snapshots.
 
----
+## Monorepo Structure
 
-![Status](https://img.shields.io/badge/status-in%20development-yellow)
-![License](https://img.shields.io/badge/license-MIT-green)
+This repository uses npm workspaces and is organized under `apps/`.
 
-## 📂 Monorepo Structure
-
-This project uses **npm workspaces** to manage both frontend and backend in a single repository.
-
-```
+```text
 Personal-Yield/
-├── packages/
-│   ├── client/     → React frontend (CRA)
-│   └── server/     → Node.js/Express API
-├── .github/        → GitHub Actions workflows
-└── package.json    → Root workspace config
+├── apps/
+│   ├── api/   -> Express API prepared for local Node.js and Cloudflare Workers
+│   └── web/   -> React frontend prepared for Cloudflare Pages
+├── scripts/   -> local helper scripts
+└── package.json
 ```
 
-| Package | Tech Stack | Details |
-|---------|-----------|---------|
-| **client** | React, Axios, Recharts, React Router | Dashboard with asset performance, dividends, responsive UI |
-| **server** | Node.js, Express, MongoDB/Mongoose | REST API with auth (JWT), data encryption, Yahoo Finance integration |
+## Local Development
 
----
+Prerequisites:
+- Node.js 20+
+- npm 10+
+- MongoDB Atlas or another reachable MongoDB deployment
 
-## 🔐 Data Security
-
-All sensitive financial data is **encrypted before being stored** in the database, ensuring privacy and protection of your investment records.
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-- **Node.js** (v18+) and **npm** (v9+)
-- **MongoDB** (local or [Atlas](https://www.mongodb.com/atlas))
-
-### Installation
+Install dependencies:
 
 ```bash
-# Clone the repository
-git clone https://github.com/RZB1414/Personal-Yield.git
-cd Personal-Yield
-
-# Install all dependencies (both client and server)
 npm install
 ```
 
-### Environment Variables
+Create these local env files:
+- `apps/api/.env` from `apps/api/.env.example`
+- `apps/web/.env` from `apps/web/.env.example`
 
-Create a `.env` file in `packages/server/`:
+Run locally:
+
+```bash
+npm run dev:server
+npm run dev:client
+```
+
+## Cloudflare Deployment
+
+### 1. Save your Cloudflare API token locally
+
+Create the file `/.env.cloudflare` in the repository root from `/.env.cloudflare.example` and fill it with:
 
 ```env
-DB_USER=your_mongodb_user
-DB_PASSWORD=your_mongodb_password
-JWT_SECRET=your_jwt_secret
-JWT_REFRESH_SECRET=your_jwt_refresh_secret
-CRYPTO_SECRET=your_crypto_secret
-PORT=3000
+CLOUDFLARE_API_TOKEN=your_cloudflare_api_token
+CLOUDFLARE_ACCOUNT_ID=a928f4bf274d697272e1ddf90cb49798
 ```
 
-### Running Locally
+This file is ignored by Git.
+
+### 2. Configure Worker secrets for the API
+
+Create `apps/api/.dev.vars` from `apps/api/.dev.vars.example` for local `wrangler dev`.
+
+Validate your Cloudflare authentication first:
 
 ```bash
-# Start the React frontend (port 3001)
-npm run dev:client
-
-# Start the API server (port 3000)
-npm run dev:server
+npm run cf:whoami
 ```
 
-### Other Commands
+To save runtime secrets in the Worker:
 
 ```bash
-# Build the React app for production
+node ./scripts/run-with-env.mjs ./.env.cloudflare -- npm run cf:secret --workspace=@personal-yield/server -- MONGO_URI
+node ./scripts/run-with-env.mjs ./.env.cloudflare -- npm run cf:secret --workspace=@personal-yield/server -- JWT_SECRET
+node ./scripts/run-with-env.mjs ./.env.cloudflare -- npm run cf:secret --workspace=@personal-yield/server -- JWT_REFRESH_SECRET
+node ./scripts/run-with-env.mjs ./.env.cloudflare -- npm run cf:secret --workspace=@personal-yield/server -- CRYPTO_SECRET
+```
+
+Optional Worker variable for CORS:
+
+```bash
+node ./scripts/run-with-env.mjs ./.env.cloudflare -- wrangler secret put CORS_ALLOWED_ORIGINS --config apps/api/wrangler.toml
+```
+
+Suggested value:
+
+```text
+https://personal-yield-web.pages.dev,https://<your-custom-pages-domain>
+```
+
+### 3. Deploy the API to Cloudflare Workers
+
+Files added for this flow:
+- `apps/api/wrangler.toml`
+- `apps/api/worker.js`
+
+The API now runs on Cloudflare Workers using Cloudflare's Node.js HTTP server compatibility layer, which allows the existing Express app to be reused.
+
+Local Worker dev:
+
+```bash
+npm run cf:api:dev
+```
+
+### 4. Deploy the frontend to Cloudflare Pages
+
+Files added for this flow:
+- `apps/web/wrangler.toml`
+- `apps/web/public/_redirects`
+
+Before deploying the frontend, set `REACT_APP_API_URL` in the Cloudflare Pages project to your Worker URL.
+
+Example:
+
+```text
+https://personal-yield-api.<your-subdomain>.workers.dev
+```
+
+Then deploy in this order:
+
+```bash
+npm run cf:deploy:api
+npm run cf:deploy:web
+```
+
+The `_redirects` file keeps the CRA app working with client-side routing on Pages.
+
+## Useful Commands
+
+```bash
 npm run build:client
-
-# Run daily price snapshots
 npm run snapshot
-
-# Seed historical snapshot data
 npm run seed:snapshots
-
-# Run React tests
 npm run test:client
+npm run cf:whoami
+npm run cf:deploy:api
+npm run cf:deploy:web
 ```
-
----
-
-## 📸 Daily Snapshots
-
-The API can take a daily snapshot of each holding's price and daily change using Yahoo Finance. A GitHub Actions workflow runs this automatically on weekdays at market close.
-
----
-
-## 🧑‍💻 Author
-
-Developed by **Renan Buiatti**
-
-📫 renanbuiatti14@gmail.com
-🌐 [LinkedIn](https://www.linkedin.com/in/renan-buiatti-13787924a)
-📷 Instagram: renanbuiatti

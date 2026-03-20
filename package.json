@@ -6,7 +6,7 @@
   "author": "Renan Buiatti",
   "license": "MIT",
   "workspaces": [
-    "packages/*"
+    "apps/*"
   ],
   "scripts": {
     "start": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
@@ -16,10 +16,15 @@
     "start:server": "npm run start --workspace=@personal-yield/server",
     "test:client": "npm run test --workspace=@personal-yield/client",
     "snapshot": "npm run snapshot --workspace=@personal-yield/server",
-    "seed:snapshots": "npm run seed:snapshots --workspace=@personal-yield/server"
+    "seed:snapshots": "npm run seed:snapshots --workspace=@personal-yield/server",
+    "cf:api:dev": "npm run cf:dev --workspace=@personal-yield/server",
+    "cf:whoami": "node ./scripts/run-with-env.mjs ./.env.cloudflare -- wrangler whoami",
+    "cf:deploy:api": "node ./scripts/run-with-env.mjs ./.env.cloudflare -- npm run cf:deploy --workspace=@personal-yield/server",
+    "cf:deploy:web": "node ./scripts/run-with-env.mjs ./.env.cloudflare -- npm run cf:deploy --workspace=@personal-yield/client"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",
-    "cross-env": "^10.1.0"
+    "cross-env": "^10.1.0",
+    "wrangler": "^4.75.0"
   }
 }

@@ -1,0 +1,4 @@
+name = "personal-yield-web"
+account_id = "a928f4bf274d697272e1ddf90cb49798"
+compatibility_date = "2026-03-20"
+pages_build_output_dir = "build"

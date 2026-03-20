@@ -1,6 +1,7 @@
 import mongoose from "mongoose"
 
 let connection
+let connectionPromise
 
 function resolveMongoUri() {
     if (process.env.MONGO_URI) {
@@ -32,18 +33,27 @@ async function dbConnection() {
         throw new Error(message)
     }
 
-    try {
-        await mongoose.connect(uri, {
+    if (connection?.readyState === 1) {
+        return connection
+    }
+
+    if (connectionPromise) {
+        return connectionPromise
+    }
+
+    connectionPromise = mongoose.connect(uri, {
             serverSelectionTimeoutMS: 30000,
             socketTimeoutMS: 45000,
             family: 4,
             maxPoolSize: 10
         })
+        .then((mongooseInstance) => {
         console.log('Connected to MongoDB')
 
-        connection = mongoose.connection
-        const db = connection.db
-    } catch (error) {
+        connection = mongooseInstance.connection
+        return connection
+        })
+        .catch((error) => {
 
         console.error('dbconnect Error:', {
             message: error.message,
@@ -51,8 +61,15 @@ async function dbConnection() {
             name: error.name
         })
         connection = null
-        return {  message: 'Error connecting to database', error: error.message }
-    }
+        throw error
+        })
+        .finally(() => {
+            if (!connection || connection.readyState !== 1) {
+                connectionPromise = null
+            }
+        })
+
+    return connectionPromise
 }
 
 export { dbConnection, connection, resolveMongoUri }
