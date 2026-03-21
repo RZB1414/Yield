@@ -35,11 +35,15 @@ function App() {
     if (isLoggedIn) {
       const userId = sessionStorage.getItem('userId');
       const loadData = async () => {
+        // Primary data: stocks with prices + dividends
         await fetchDividendsStocks()
         setDataLoaded(true)
-        const brokersResult = await getBrokers(userId);
-        const totalValuesResult = await getAllTotalValues(userId);
-        const cardValuesResult = await getAllCreditCards(userId);
+        // Secondary data: fetch in parallel
+        const [brokersResult, totalValuesResult, cardValuesResult] = await Promise.all([
+          getBrokers(userId),
+          getAllTotalValues(userId),
+          getAllCreditCards(userId),
+        ]);
         setCardValues(cardValuesResult);
         setBrokerData(brokersResult);
         setTotalValuesData(totalValuesResult)

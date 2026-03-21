@@ -187,7 +187,13 @@ async function saveBtgDividends(input) {
   const valor = moneyRegex.test(valorToken || '') ? parseMoney(valorToken) : null;
   const userId = sessionStorage.getItem('userId')
   const valorAjustado = (descTokens.join(' ').trim() === 'VENDA' && typeof valor === 'number' && valor > 0) ? -valor : valor;
-  objetos.push({ userId: userId, date: parseDateBR(data), lancamento: descTokens.join(' ').trim(), ticker, valor: valorAjustado });
+  // Normalize valor to 2 decimals and date to YYYY-MM-DD for consistent dedup
+  const normalizedValor = typeof valorAjustado === 'number' ? Math.round(valorAjustado * 100) / 100 : valorAjustado;
+  const dateObj = parseDateBR(data);
+  const dateStr = dateObj instanceof Date && !isNaN(dateObj.getTime())
+    ? `${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}-${String(dateObj.getDate()).padStart(2,'0')}`
+    : data;
+  objetos.push({ userId: userId, date: dateStr, lancamento: descTokens.join(' ').trim(), ticker, valor: normalizedValor });
   }
   if (!objetos.length) {
     console.warn('Nenhum objeto gerado', { start, padrao, preview: resultado.slice(0,40) });
@@ -215,16 +221,15 @@ async function saveBtgDividends(input) {
 async function getBtgDividends(id) {
   try {
     const response = await btgDividendsApi.get(`/auth/getBtgDividendsByUserId/${id}`)
-  const data = response.data || []
-  // Usa o response.data para gerar os 2 arrays solicitados
-  const { dividends, transactions } = splitBtgLancamentos(data)
-  // Anexa os grupos ao próprio array para manter compatibilidade (length continua funcionando)
-  data.btgDividends = dividends
-  data.btgTransactions = transactions
-  return { dividends, transactions }
+    const data = response.data;
+    if (!Array.isArray(data)) {
+      return { dividends: [], transactions: [] };
+    }
+    const { dividends, transactions } = splitBtgLancamentos(data);
+    return { dividends, transactions };
   } catch (error) {
     console.error('Erro ao obter dados:', error);
-    return null
+    return { dividends: [], transactions: [] };
   }
 }
 

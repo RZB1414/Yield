@@ -5,7 +5,6 @@ import { createStoredTradingDate } from '../utils/normalizers.js';
 class SnapshotController {
   static async getUserSnapshots(req, res) {
     try {
-      const secretKey = process.env.CRYPTO_SECRET;
       const authUserId = req.user?.id || req.user?._id || req.user;
       // Preferir userId enviado pelo frontend (params ou query); fallback para token
       const userId = req.params.userId || req.query.userId || authUserId;
@@ -26,10 +25,6 @@ class SnapshotController {
       const page = Math.max(parseInt(req.query.page || '1', 10), 1);
       const limit = Math.min(Math.max(parseInt(req.query.limit || '500', 10), 1), 2000);
       const skip = (page - 1) * limit;
-
-      const filter = all
-        ? { userId }
-        : { userId, tradingDate: { $gte: fromDate, $lte: toDate } };
 
       const total = await countSnapshotsByUser({
         userId,

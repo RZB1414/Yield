@@ -47,6 +47,20 @@ async function stockData(stock) {
     }
 }
 
+// Batch fetch: returns stocks list enriched with current prices in one call
+async function getStocksWithPrices(id) {
+    try {
+        const response = await stocksApi.get(`/auth/getStocksWithPrices/${id}`);
+        if (response.data && response.data.aviso) {
+            return { aviso: response.data.aviso };
+        }
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching stocks with prices:', error);
+        throw error;
+    }
+}
+
 
 async function addStock(stock) {
     try {
@@ -112,6 +126,7 @@ export { searchStocks,
             stockData,
             addStock,
             getStocksList,
+            getStocksWithPrices,
             updateStock,
             deleteStock
         }

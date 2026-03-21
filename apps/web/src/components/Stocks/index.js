@@ -105,7 +105,7 @@ const Stocks = ({ fetchingAgain, setRefresh }) => {
     const stockInfo = async (stock) => {
         try {
             const stockDataResult = await stockData(stock)
-            const stockDetails = stockDataResult["stock info: "]
+            const stockDetails = stockDataResult.stockInfo
             setStockClicked(stockDetails)
             setShowingStock(true)
         } catch (error) {

@@ -1,5 +1,5 @@
 import { getAllDividends } from "../../services/dividends"
-import { getStocksList, stockData } from "../../services/stocks"
+import { getStocksWithPrices } from "../../services/stocks"
 import './Connect.css';
 import { getCurrentUser, loginUser } from '../../services/login'
 import { useState } from 'react';
@@ -24,24 +24,22 @@ const fetchDividendsStocks = async () => {
     filteredDividends = [];
     decryptedDividends = [];
     try {
-        stocks = await getStocksList(userId);
-        
-        updated = await Promise.all(
-            stocks.map(async (stock) => {             
-                const stockDataResult = await stockData(stock.symbol)             
-                
-                return {
-                    ...stock,
-                    currentPrice: stockDataResult["stock info: "]?.currentPrice ?? 0,
-                    dayPriceChangePercent: stockDataResult["stock info: "]?.dayPriceChangePercent ?? 0
-                };
-            })
-        )
-        
-        const passwordKey = password
-        const allDividends = await getAllDividends(userId, passwordKey)
-        if (allDividends && allDividends.unfilteredDividends) {
+        // Single batch call replaces N+1 individual price fetches
+        updated = await getStocksWithPrices(userId);
+        if (updated && updated.aviso) {
+            updated = [];
+        }
+        stocks = updated.map(({ currentPrice, dayPriceChangePercent, ...rest }) => rest);
 
+        const passwordKey = password;
+
+        // Fetch dividends and BTG data in parallel
+        const [allDividends, btgResponse] = await Promise.all([
+            getAllDividends(userId, passwordKey),
+            getBtgDividends(userId),
+        ]);
+
+        if (allDividends && allDividends.unfilteredDividends) {
             const includedDividends = [
                 "NOTA",
                 "RENDIMENTO RENDA FIXA",
@@ -49,23 +47,18 @@ const fetchDividendsStocks = async () => {
                 "CASHBACK CARTAO",
             ];
 
-
             filteredDividends = allDividends.unfilteredDividends.filter(
                 dividend => includedDividends.includes(dividend.ticker)
-            )
-
-            dividends = allDividends
-            
+            );
+            dividends = allDividends;
         }
 
-        const btgResponse = await getBtgDividends(userId)
-        if (btgResponse && Array.isArray(btgResponse.dividends) && (btgResponse.dividends.length || btgResponse.transactions.length) > 0) {
-            btgDividends = btgResponse.dividends
-            btgTransactions = btgResponse.transactions
+        if (btgResponse && Array.isArray(btgResponse.dividends) && (btgResponse.dividends.length + btgResponse.transactions.length) > 0) {
+            btgDividends = btgResponse.dividends;
+            btgTransactions = btgResponse.transactions;
         } else {
-            console.warn('No BTG dividends available');
-            btgDividends = []
-            btgTransactions = []
+            btgDividends = [];
+            btgTransactions = [];
         }
     } catch (error) {
         console.error('Error fetching Data:', error);

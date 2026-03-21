@@ -6,12 +6,14 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev --config wrangler.toml --local",
+    "deploy": "node ./scripts/wrangler-with-cloudflare-env.mjs deploy --config wrangler.toml",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "wrangler dev --config wrangler.toml --local",
     "cf:dev": "wrangler dev --config wrangler.toml",
-    "cf:deploy": "wrangler deploy --config wrangler.toml",
-    "cf:tail": "wrangler tail --config wrangler.toml",
-    "cf:secret": "wrangler secret put"
+    "cf:deploy": "npm run deploy",
+    "cf:tail": "node ./scripts/wrangler-with-cloudflare-env.mjs tail yield --config wrangler.toml",
+    "cf:secret": "node ./scripts/wrangler-with-cloudflare-env.mjs secret put",
+    "cf:whoami": "node ./scripts/wrangler-with-cloudflare-env.mjs whoami"
   },
   "author": "Renan Buiatti",
   "license": "ISC",

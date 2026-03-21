@@ -5,7 +5,7 @@ import cookieParser from 'cookie-parser';
 import { corsOptions } from './config/cors.js';
 
 const app = express();
-const MAX_REQUEST_BODY_BYTES = 10000 * 1024 * 1024;
+const MAX_REQUEST_BODY_BYTES = 10 * 1024 * 1024; // 10MB
 
 function parseUrlEncodedBody(value) {
   const params = new URLSearchParams(value);

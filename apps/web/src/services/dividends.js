@@ -75,14 +75,24 @@ async function encryptDividends(parsedData, password) {
 
   for (const item of parsedData) {
     // Normalização determinística
-    const mov = item.movimentacao instanceof Date ? item.movimentacao.toISOString() : '';
-    const liq = item.liquidacao instanceof Date ? item.liquidacao.toISOString() : '';
+    // Normalize dates to YYYY-MM-DD (date-only) to avoid timezone-induced hash differences
+    function toDateOnly(d) {
+      if (!(d instanceof Date) || isNaN(d.getTime())) return '';
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+    const mov = item.movimentacao instanceof Date ? toDateOnly(item.movimentacao) : '';
+    const liq = item.liquidacao instanceof Date ? toDateOnly(item.liquidacao) : '';
     const ticker = (item.ticker || '').trim().toUpperCase();
-    // Valor sempre com 2 casas decimais, como string
     const valorNum = typeof item.valor === 'number' ? item.valor : 0;
     const valor = Number(valorNum).toFixed(2);
 
-    const safeItem = { ...item, movimentacao: mov, liquidacao: liq, ticker, valor: Number(valor) };
+    // Store ISO strings in encrypted data for backwards compatibility
+    const movIso = item.movimentacao instanceof Date ? item.movimentacao.toISOString() : '';
+    const liqIso = item.liquidacao instanceof Date ? item.liquidacao.toISOString() : '';
+    const safeItem = { ...item, movimentacao: movIso, liquidacao: liqIso, ticker, valor: Number(valor) };
 
     const salt = window.crypto.getRandomValues(new Uint8Array(16));
     const iv = window.crypto.getRandomValues(new Uint8Array(12));
@@ -95,7 +105,7 @@ async function encryptDividends(parsedData, password) {
       data
     );
 
-    // Hash determinístico
+    // Deterministic hash using date-only strings to prevent duplicates across uploads
     const hashSource = `${mov}|${liq}|${ticker}|${valor}`;
     const hashBuffer = await window.crypto.subtle.digest('SHA-256', enc.encode(hashSource));
     const hashHex = bufferToHex(hashBuffer);

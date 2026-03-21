@@ -27,38 +27,27 @@ class UserController {
 
     static async login(req, res) {
         const { email, password } = req.body;
-        console.log('Login attempt with email: ', email);
-
         if (!email || !password) {
             return res.status(400).json({ msg: "Email and password are required" });
         }
         try {
             const foundUser = await findUserByEmail(email);
-            console.log('Found user: ', foundUser);
-
             if (!foundUser) {
                 return res.status(401).json({ msg: "Invalid email or password" });
             }
             const isMatch = await bcrypt.compare(password, foundUser.password);
             if (!isMatch) {
-                console.log('Password does not match for user: ', email);
-                
                 return res.status(401).json({ msg: "Invalid email or password" });
             }
 
             // Gera token JWT
             const payload = { id: foundUser._id, email: foundUser.email };
-            const accessToken = jwt.sign(payload, getJwtSecret(), { expiresIn: "15m" });
+            const accessToken = jwt.sign(payload, getJwtSecret(), { expiresIn: "7d" });
 
-            // Retorna o token no corpo da resposta
-
-            console.log('access token', accessToken);
-            
             res.status(200).json({ msg: "Login successful", accessToken });
         } catch (error) {
-            console.log('Error during login: ', error);
-            
-            res.status(500).json({ msg: "Error logging in", error: error.message });
+            console.error('Login error:', error.message);
+            res.status(500).json({ msg: "Error logging in" });
         }
     }
 
