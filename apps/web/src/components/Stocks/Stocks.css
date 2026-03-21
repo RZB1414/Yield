@@ -21,7 +21,49 @@
     display: flex;
     flex-direction: column;
     position: relative;
-    width: 100%;
+    width: min(100%, 1120px);
+    margin: 12px auto 24px;
+    padding: 20px clamp(14px, 2vw, 24px) 24px;
+    gap: 12px;
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--color-surface-alt) 82%, transparent) 0%, transparent 100%),
+        linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 10%, var(--color-surface)) 0%, var(--color-surface) 65%);
+    border: 1px solid color-mix(in srgb, var(--color-border) 85%, var(--color-primary) 15%);
+    border-radius: 22px;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.stocks-list-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 4px;
+    background: linear-gradient(90deg, var(--color-primary) 0%, var(--chart-price-line) 100%);
+    opacity: 0.95;
+    pointer-events: none;
+}
+
+.stocks-list-wrapper::after {
+    content: '';
+    position: absolute;
+    top: -64px;
+    right: -48px;
+    width: 180px;
+    height: 180px;
+    background: radial-gradient(circle, color-mix(in srgb, var(--color-primary) 14%, transparent) 0%, transparent 68%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+@media (max-width: 768px) {
+    .stocks-list-wrapper {
+        width: 100%;
+        margin: 8px auto 20px;
+        padding: 16px 12px 20px;
+        border-radius: 18px;
+    }
 }
 
 .stocks-list-title-USD {
