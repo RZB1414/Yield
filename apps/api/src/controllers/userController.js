@@ -1,6 +1,7 @@
-import { user } from "../models/User.js"
-import bcrypt from "bcrypt"
-import jwt from "jsonwebtoken"
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import { createUserRecord, findUserByEmail, findUserById, listUsers } from '../data/users.js';
+import { getJwtSecret } from '../utils/security.js';
 
 class UserController {
 
@@ -10,18 +11,16 @@ class UserController {
             return res.status(400).json({ msg: "All fields are required" });
         }
         try {
-            // Aplica hash seguro no backend, mesmo que a senha já venha hasheada do front
             const saltRounds = 10;
             const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-            const newUser = new user({
-                userName,
-                email,
-                password: hashedPassword
-            })
-            await newUser.save();
+            const newUser = await createUserRecord({ userName, email, password: hashedPassword });
             res.status(201).json({ msg: 'New User Created', data: newUser });
         } catch (error) {
+            if (error.code === 'USER_EMAIL_CONFLICT') {
+                return res.status(400).json({ msg: 'User already exists with this email' });
+            }
+
             res.status(500).json({ msg: "Error creating user", error: error.message });
         }
     }
@@ -34,7 +33,7 @@ class UserController {
             return res.status(400).json({ msg: "Email and password are required" });
         }
         try {
-            const foundUser = await user.findOne({ email });
+            const foundUser = await findUserByEmail(email);
             console.log('Found user: ', foundUser);
 
             if (!foundUser) {
@@ -49,7 +48,7 @@ class UserController {
 
             // Gera token JWT
             const payload = { id: foundUser._id, email: foundUser.email };
-            const accessToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "15m" });
+            const accessToken = jwt.sign(payload, getJwtSecret(), { expiresIn: "15m" });
 
             // Retorna o token no corpo da resposta
 
@@ -65,7 +64,7 @@ class UserController {
 
     static async getAllUsers(req, res) {
         try {
-            const users = await user.find();
+            const users = await listUsers();
             res.status(200).json(users);
         } catch (error) {
             res.status(500).json({ msg: "Error fetching users", error: error.message });
@@ -78,7 +77,7 @@ class UserController {
             return res.status(400).send('ID is required');
         }
         try {
-            const foundUser = await user.findById(id);
+            const foundUser = await findUserById(id);
             if (!foundUser) {
                 return res.status(404).send('User not found');
             }
@@ -96,7 +95,7 @@ class UserController {
         if (!token) return res.status(401).json({ msg: "Access token not found" });
 
         try {
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const decoded = jwt.verify(token, getJwtSecret());
             return res.status(200).json({ id: decoded.id, email: decoded.email });
         } catch (err) {
             return res.status(403).json({ msg: "Invalid access token" });

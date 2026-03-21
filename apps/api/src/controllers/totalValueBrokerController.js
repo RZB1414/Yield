@@ -1,5 +1,11 @@
-import { totalValueBroker } from "../models/TotalValueBoker.js"
-import CryptoJS from "crypto-js"
+import {
+    createTotalValueBrokerRecord,
+    deleteTotalValueBrokerRecord,
+    findTotalValueBrokerByUserBrokerMonth,
+    listTotalValueBrokersByUserId,
+    updateTotalValueBrokerValue,
+} from '../data/totalValueBrokers.js';
+import { decryptValue, encryptValue } from '../utils/security.js';
 
 class TotalValueBrokerController {
 
@@ -8,54 +14,30 @@ class TotalValueBrokerController {
         const { date, currency, totalValueInUSD, totalValueInBRL, broker, userId } = req.body;
         console.log("Creating total value broker with data:", req.body);
         
-        if (!date || !currency || !totalValueInUSD || !totalValueInBRL || !broker || !userId) {
+        if (!date || !currency || totalValueInUSD === undefined || totalValueInBRL === undefined || !broker || !userId) {
             return res.status(200).json({ msg: "All fields are required" });
         }
         try {
-
-            const d = new Date(date);
-            const month = d.getUTCMonth();
-            const year = d.getUTCFullYear();
-
-            // Busca por corretora e mês/ano (ignorando o dia e fuso horário)
-            const existingEntry = await totalValueBroker.findOne({
-                "broker._id": broker._id,
-                $expr: {
-                    $and: [
-                        { $eq: [{ $month: "$date" }, month + 1] }, // $month é 1-based
-                        { $eq: [{ $year: "$date" }, year] }
-                    ]
-                }
-            })
+            const existingEntry = await findTotalValueBrokerByUserBrokerMonth(userId, broker._id, date);
 
             if (existingEntry) {
                 return res.status(200).json({ msg: "An entry for this broker already exists this month" });
             }
 
-            // Criptografa os valores antes de salvar
-            const secretKey = process.env.CRYPTO_SECRET;
-            const encryptedCurrency = CryptoJS.AES.encrypt(currency, secretKey).toString();
-            const encryptedUSD = CryptoJS.AES.encrypt(totalValueInUSD.toString(), secretKey).toString();
-            const encryptedBRL = CryptoJS.AES.encrypt(totalValueInBRL.toString(), secretKey).toString();
-
-
-            // Criptografa campos sensíveis do objeto broker conforme o schema
-            const brokerToSave = { ...broker };
-            if (brokerToSave.broker) brokerToSave.broker = CryptoJS.AES.encrypt(brokerToSave.broker, secretKey).toString();
-            if (brokerToSave.currency) brokerToSave.currency = CryptoJS.AES.encrypt(brokerToSave.currency, secretKey).toString();
-            if (brokerToSave.userId) brokerToSave.userId = CryptoJS.AES.encrypt(brokerToSave.userId, secretKey).toString();
-
-            // Salva a data normalizada
-            const newTotalValueBroker = new totalValueBroker({
+            const newTotalValueBroker = await createTotalValueBrokerRecord({
                 date: date,
-                currency: encryptedCurrency,
-                totalValueInUSD: encryptedUSD,
-                totalValueInBRL: encryptedBRL,
-                broker: brokerToSave,
+                currency: encryptValue(currency),
+                totalValueInUSD: encryptValue(totalValueInUSD),
+                totalValueInBRL: encryptValue(totalValueInBRL),
+                broker: {
+                    _id: broker._id,
+                    broker: encryptValue(broker.broker),
+                    currency: encryptValue(broker.currency),
+                    userId: broker.userId ? encryptValue(broker.userId) : null,
+                },
                 userId
             });
 
-            await newTotalValueBroker.save();
             res.status(201).json({ msg: 'New Total Value Created', data: newTotalValueBroker });
         } catch (error) {
             res.status(500).json({ msg: "Error creating total value broker", error: error.message })
@@ -66,36 +48,21 @@ class TotalValueBrokerController {
     static async getAllTotalValueBrokers(req, res) {
         const { id } = req.params
         try {
-            const secretKey = process.env.CRYPTO_SECRET;
-            const totalValueBrokers = await totalValueBroker.find({ userId: id });
-            // Descriptografa os campos de cada registro
+            const totalValueBrokers = await listTotalValueBrokersByUserId(id);
             const decryptedBrokers = totalValueBrokers.map(item => {
-                let currency = item.currency;
-                let totalValueInUSD = item.totalValueInUSD;
-                let totalValueInBRL = item.totalValueInBRL;
-                let broker = item.broker;
-                try {
-                    currency = CryptoJS.AES.decrypt(item.currency, secretKey).toString(CryptoJS.enc.Utf8);
-                    totalValueInUSD = CryptoJS.AES.decrypt(item.totalValueInUSD, secretKey).toString(CryptoJS.enc.Utf8);
-                    totalValueInBRL = CryptoJS.AES.decrypt(item.totalValueInBRL, secretKey).toString(CryptoJS.enc.Utf8);
-                    // Descriptografa campos do objeto broker
-                    if (broker && typeof broker === 'object') {
-                        // Se vier como documento Mongoose, pega só o _doc
-                        if (broker._doc) broker = broker._doc;
-                        broker = { ...broker };
-                        if (broker.broker) broker.broker = CryptoJS.AES.decrypt(broker.broker, secretKey).toString(CryptoJS.enc.Utf8);
-                        if (broker.currency) broker.currency = CryptoJS.AES.decrypt(broker.currency, secretKey).toString(CryptoJS.enc.Utf8);
-                        if (broker.userId) broker.userId = CryptoJS.AES.decrypt(broker.userId, secretKey).toString(CryptoJS.enc.Utf8);
-                    }
-                } catch (e) {
-                    // Se falhar, retorna os dados como estão
-                }
                 return {
-                    ...item.toObject(),
-                    currency,
-                    totalValueInUSD,
-                    totalValueInBRL,
-                    broker
+                    _id: item._id,
+                    date: item.date,
+                    currency: decryptValue(item.currency) ?? item.currency,
+                    totalValueInUSD: decryptValue(item.totalValueInUSD) ?? item.totalValueInUSD,
+                    totalValueInBRL: decryptValue(item.totalValueInBRL) ?? item.totalValueInBRL,
+                    broker: {
+                        _id: item.brokerId,
+                        broker: decryptValue(item.brokerName) ?? item.brokerName,
+                        currency: decryptValue(item.brokerCurrency) ?? item.brokerCurrency,
+                        userId: decryptValue(item.brokerUserId) ?? item.brokerUserId,
+                    },
+                    userId: item.userId,
                 };
             });
             res.status(200).json(decryptedBrokers)
@@ -113,34 +80,26 @@ class TotalValueBrokerController {
         }
 
         try {
-            // Calcula o início e o fim do mês com base no monthIndex
             const currentYear = new Date().getFullYear();
             const startOfMonth = new Date(currentYear, monthIndex, 1);
-            const endOfMonth = new Date(currentYear, monthIndex + 1, 0);
-
-            // Encontra a entrada correspondente no banco de dados
-            const totalValueBrokerEntry = await totalValueBroker.findOne({
-                broker: broker,
-                date: { $gte: startOfMonth, $lte: endOfMonth }
-            });
+            const totalValueBrokerEntry = await findTotalValueBrokerByUserBrokerMonth(req.user?.id, broker._id, startOfMonth);
 
             if (!totalValueBrokerEntry) {
                 return res.status(404).json({ msg: "Total value broker entry not found for the specified month and broker" });
             }
 
-            // Atualiza o campo correspondente (type pode ser "totalValueInUSD" ou "totalValueInBRL")
+            let columnName;
             if (type === "totalValueInUSD") {
-                totalValueBrokerEntry.totalValueInUSD = newValue;
+                columnName = 'total_value_in_usd';
             } else if (type === "totalValueInBRL") {
-                totalValueBrokerEntry.totalValueInBRL = newValue;
+                columnName = 'total_value_in_brl';
             } else {
                 return res.status(400).json({ msg: "Invalid type. Must be 'totalValueInUSD' or 'totalValueInBRL'" });
             }
 
-            // Salva as alterações no banco de dados
-            await totalValueBrokerEntry.save();
+            const updatedEntry = await updateTotalValueBrokerValue(totalValueBrokerEntry._id, columnName, encryptValue(newValue));
 
-            res.status(200).json({ msg: "Total value broker updated successfully", data: totalValueBrokerEntry });
+            res.status(200).json({ msg: "Total value broker updated successfully", data: updatedEntry });
         } catch (error) {
             res.status(500).json({ msg: "Error updating total value broker", error: error.message });
         }
@@ -152,7 +111,7 @@ class TotalValueBrokerController {
             return res.status(400).send('ID is required')
         }
         try {
-            const deletedTotalValueBroker = await totalValueBroker.findByIdAndDelete(id)
+            const deletedTotalValueBroker = await deleteTotalValueBrokerRecord(id)
             if (!deletedTotalValueBroker) {
                 return res.status(404).send('Total value broker not found')
             }

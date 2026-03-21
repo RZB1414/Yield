@@ -2,6 +2,7 @@ import { createServer } from 'node:http';
 import { httpServerHandler } from 'cloudflare:node';
 import app from './src/app.js';
 import { initializeApp } from './src/bootstrap.js';
+import { runWithRuntimeContext, setGlobalRuntimeEnv } from './src/config/runtime.js';
 import { runDailySnapshot } from './src/jobs/dailySnapshotJob.js';
 
 let startupPromise;
@@ -17,9 +18,8 @@ async function ensureInitialized() {
   return startupPromise;
 }
 
-const server = createServer(async (req, res) => {
+const server = createServer((req, res) => {
   try {
-    await ensureInitialized();
     app(req, res);
   } catch (error) {
     console.error('Worker request initialization failed:', error);
@@ -29,16 +29,26 @@ const server = createServer(async (req, res) => {
 });
 
 server.listen(8080);
+const workerHandler = httpServerHandler({ port: 8080 });
 
 export default {
-  fetch: httpServerHandler(server),
-  async scheduled(controller, env, ctx) {
-    try {
+  async fetch(request, env, ctx) {
+    setGlobalRuntimeEnv(env);
+    return runWithRuntimeContext({ env, ctx }, async () => {
       await ensureInitialized();
-      ctx.waitUntil(runDailySnapshot());
-    } catch (error) {
-      console.error('Scheduled snapshot failed to initialize:', error);
-      throw error;
-    }
+      return workerHandler.fetch(request, env, ctx);
+    });
+  },
+  async scheduled(controller, env, ctx) {
+    setGlobalRuntimeEnv(env);
+    return runWithRuntimeContext({ env, ctx }, async () => {
+      try {
+        await ensureInitialized();
+        ctx.waitUntil(runDailySnapshot());
+      } catch (error) {
+        console.error('Scheduled snapshot failed to initialize:', error);
+        throw error;
+      }
+    });
   },
 };

@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { getJwtSecret } from '../utils/security.js';
 
 export function authenticateToken(req, res, next) {
     // Tenta pegar o token do cookie ou do header Authorization
@@ -10,7 +11,7 @@ export function authenticateToken(req, res, next) {
         return res.status(401).json({ msg: "Access token not found" });
     }
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, getJwtSecret());
         req.user = decoded;
         next();
     } catch (err) {

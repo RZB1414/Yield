@@ -1,5 +1,6 @@
-import CryptoJS from 'crypto-js';
-import { Snapshot } from '../models/Snapshot.js';
+import { countSnapshotsByUser, listSnapshotsByUser } from '../data/snapshots.js';
+import { decryptNumber, decryptValue } from '../utils/security.js';
+import { createStoredTradingDate } from '../utils/normalizers.js';
 
 class SnapshotController {
   static async getUserSnapshots(req, res) {
@@ -30,39 +31,32 @@ class SnapshotController {
         ? { userId }
         : { userId, tradingDate: { $gte: fromDate, $lte: toDate } };
 
-      const total = await Snapshot.countDocuments(filter);
-      const docs = await Snapshot.find(filter)
-        .sort({ tradingDate: -1, symbolHash: 1 })
-        .skip(skip)
-        .limit(limit)
-        .lean();
-
-      const decryptStr = (val) => {
-        if (val == null) return null;
-        try {
-          const s = CryptoJS.AES.decrypt(val, secretKey).toString(CryptoJS.enc.Utf8);
-          return s || null;
-        } catch {
-          return null;
-        }
-      };
-      const decryptNum = (val) => {
-        const s = decryptStr(val);
-        const n = s != null ? parseFloat(s) : null;
-        return Number.isFinite(n) ? n : null;
-      };
+      const total = await countSnapshotsByUser({
+        userId,
+        fromDate: createStoredTradingDate(fromDate),
+        toDate: createStoredTradingDate(toDate),
+        allRecords: all,
+      });
+      const docs = await listSnapshotsByUser({
+        userId,
+        fromDate: createStoredTradingDate(fromDate),
+        toDate: createStoredTradingDate(toDate),
+        allRecords: all,
+        limit,
+        offset: skip,
+      });
 
       const items = docs.map(d => ({
         userId: d.userId,
-        symbol: decryptStr(d.symbol),
-        currency: decryptStr(d.currency),
-        closePrice: decryptNum(d.closePrice),
-        dayChange: decryptNum(d.dayChange),
-        dayChangePercent: decryptNum(d.dayChangePercent),
-        fxUSDBRL: decryptNum(d.fxUSDBRL),
-        fxBRLUSD: decryptNum(d.fxBRLUSD),
-        totalValueUSD: decryptNum(d.totalValueUSD),
-        totalValueBRL: decryptNum(d.totalValueBRL),
+        symbol: decryptValue(d.symbol),
+        currency: decryptValue(d.currency),
+        closePrice: decryptNumber(d.closePrice),
+        dayChange: decryptNumber(d.dayChange),
+        dayChangePercent: decryptNumber(d.dayChangePercent),
+        fxUSDBRL: decryptNumber(d.fxUSDBRL),
+        fxBRLUSD: decryptNumber(d.fxBRLUSD),
+        totalValueUSD: decryptNumber(d.totalValueUSD),
+        totalValueBRL: decryptNumber(d.totalValueBRL),
         tradingDate: d.tradingDate,
         createdAt: d.createdAt
       }));

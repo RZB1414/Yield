@@ -1,4 +1,9 @@
-import { encryptedDividends } from "../models/EncryptedDividends.js"
+import {
+    deleteEncryptedDividendsByUserId,
+    insertEncryptedDividends,
+    listEncryptedDividends,
+    listEncryptedDividendsByUserId,
+} from '../data/encryptedDividends.js';
 
 class EncryptedDividendsController {
 
@@ -9,26 +14,12 @@ class EncryptedDividendsController {
                 return res.status(400).json({ message: "No records provided" });
             }
     
-            let insertedCount = 0;
-            let duplicatedCount = 0;
-    
-            try {                
-                const result = await encryptedDividends.insertMany(records, { ordered: false });
-                insertedCount = result.length;
-                duplicatedCount = records.length - insertedCount;
-            } catch (error) {
-                if (error.code === 11000 || error.writeErrors) {
-                    insertedCount = error.result?.result?.nInserted || (error.insertedDocs ? error.insertedDocs.length : 0);
-                    duplicatedCount = records.length - insertedCount;
-                } else {
-                    throw error;
-                }
-            }
+            const { inserted, duplicated } = await insertEncryptedDividends(records);
     
             return res.status(200).json({
                 message: "Operação concluída.",
-                inserted: insertedCount,
-                duplicated: duplicatedCount
+                inserted,
+                duplicated
             });
         } catch (error) {
             console.error("Error saving encrypted dividends:", error);
@@ -38,7 +29,7 @@ class EncryptedDividendsController {
 
     static async findAll(req, res) {
         try {
-            const records = await encryptedDividends.find();
+            const records = await listEncryptedDividends();
             if (records.length === 0) {
                 return res.status(404).json({ message: "No records found" });
             }
@@ -52,7 +43,7 @@ class EncryptedDividendsController {
     static async findByUserId(req, res) {
         try {
             const { id } = req.params;
-            const records = await encryptedDividends.find({ userId: id });
+            const records = await listEncryptedDividendsByUserId(id);
             if (records.length === 0) {
                 return res.status(200).json({ message: "No records found for this user" });
             }
@@ -66,8 +57,8 @@ class EncryptedDividendsController {
     static async deleteByUserId(req, res) {
         try {
             const { userId } = req.params;
-            const result = await encryptedDividends.deleteMany({ userId });
-            if (result.deletedCount === 0) {
+            const result = await deleteEncryptedDividendsByUserId(userId);
+            if ((result.meta?.changes ?? 0) === 0) {
                 return res.status(404).json({ message: "No records found for this user" });
             }
             res.status(200).json({ message: "Records deleted successfully" });

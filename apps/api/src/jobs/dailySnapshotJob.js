@@ -1,51 +1,33 @@
-import YahooFinance from "yahoo-finance2";
-import CryptoJS from "crypto-js";
-import { stock } from "../models/Stock.js";
-import { Snapshot } from "../models/Snapshot.js";
-
-const yahooFinance = new YahooFinance();
+import { listAllStocks } from '../data/stocks.js';
+import { upsertSnapshotRecord } from '../data/snapshots.js';
+import { getYahooQuote } from '../services/yahooFinance.js';
+import { createStoredTradingDate } from '../utils/normalizers.js';
+import { createBlindIndex, decryptValue, encryptValue } from '../utils/security.js';
 
 // Lógica reutilizável (não agenda aqui para poder ser chamada pelo GitHub Actions)
 export async function runDailySnapshot() {
-  // Lê a secret aqui para garantir que dotenv já tenha carregado
-  const SECRET = process.env.CRYPTO_SECRET;
-  if (!SECRET) {
-    console.warn("[Snapshot] CRYPTO_SECRET não definida. Tentando continuar, mas descriptografia pode falhar.");
-  }
   const now = new Date();
-  // const day = now.getUTCDay();
   const day = now.getUTCDay();
   if (day === 0 || day === 6) {
     console.log("[Snapshot] Weekend. Skipping.");
     return;
   }
 
-  const tradingDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const tradingDate = createStoredTradingDate(now);
 
   try {
-    const allPositions = await stock.find({});
+    const allPositions = await listAllStocks();
     if (!allPositions.length) {
       console.log("[Snapshot] No positions found.");
       return;
     }
 
-    // Descriptografia no estilo do StockController: tenta descriptografar e, se vier vazio, retorna o valor original
-    const decryptOrPass = (val) => {
-      if (val == null) return val;
-      try {
-        const s = CryptoJS.AES.decrypt(val, SECRET).toString(CryptoJS.enc.Utf8);
-        return s || val;
-      } catch {
-        return val;
-      }
-    };
-
     const decryptedPositions = allPositions.map(p => ({
       userId: p.userId,
-      symbol: decryptOrPass(p.symbol),
-      currency: decryptOrPass(p.currency),
-      averagePrice: parseFloat(decryptOrPass(p.averagePrice)) || null,
-      stocksQuantity: parseFloat(decryptOrPass(p.stocksQuantity)) || null
+      symbol: decryptValue(p.symbol) ?? p.symbol,
+      currency: decryptValue(p.currency) ?? p.currency,
+      averagePrice: Number.parseFloat(decryptValue(p.averagePrice) ?? ''),
+      stocksQuantity: Number.parseFloat(decryptValue(p.stocksQuantity) ?? '')
     }));
 
     // Normalização de símbolos para Yahoo Finance:
@@ -70,18 +52,11 @@ export async function runDailySnapshot() {
     const quotesMap = {}; // apiSymbol -> quote
     let fxUSDBRL = null; // cache de câmbio por execução
 
-    // Garante que índices (incluindo o único) estejam inicializados antes dos upserts
-    try {
-      await Snapshot.init();
-    } catch (idxErr) {
-      console.warn('[Snapshot] Warn initializing indexes:', idxErr.message);
-    }
-
     try {
       if (!uniqueSymbols.length) {
         console.log('[Snapshot] No symbols to quote after normalization.');
       } else {
-        const batch = await yahooFinance.quote(uniqueSymbols);
+        const batch = await getYahooQuote(uniqueSymbols);
         if (Array.isArray(batch)) {
           batch.forEach(q => { if (q && q.symbol) quotesMap[q.symbol] = q; });
         } else if (batch && batch.symbol) {
@@ -92,7 +67,7 @@ export async function runDailySnapshot() {
       console.warn("[Snapshot] Batch quote fail, fallback one by one:", err.message);
       for (const sym of uniqueSymbols) {
         try {
-          const q = await yahooFinance.quote(sym);
+          const q = await getYahooQuote(sym);
           if (q && q.symbol) quotesMap[q.symbol] = q;
         } catch (er) {
           console.warn(`[Snapshot] Failed quote ${sym}:`, er.message);
@@ -102,7 +77,7 @@ export async function runDailySnapshot() {
 
     // Busca taxa USDBRL uma vez por execução (opcional, para enriquecer snapshots)
     try {
-      const fx = await yahooFinance.quote('USDBRL=X');
+      const fx = await getYahooQuote('USDBRL=X');
       const rate = fx?.regularMarketPrice;
       if (typeof rate === 'number' && isFinite(rate)) fxUSDBRL = rate; // BRL por 1 USD
     } catch (e) {
@@ -197,20 +172,7 @@ export async function runDailySnapshot() {
       const storedSymbol = originalSymbol.endsWith('.SA') ? originalSymbol.replace('.SA', '') : originalSymbol;
 
       // Funções utilitárias
-      const looksEncrypted = (val) => typeof val === 'string' && /^U2FsdGVkX1/i.test(val);
-      const encrypt = (val) => {
-        if (val == null) return val;
-        const s = String(val);
-        if (looksEncrypted(s)) return s; // evita duplo encryption
-        try { return CryptoJS.AES.encrypt(s, SECRET).toString(); } catch { return s; }
-      };
-      const hashSymbol = (sym) => {
-        // SHA-256 em hex
-        return CryptoJS.SHA256(sym).toString(CryptoJS.enc.Hex);
-      };
-
-      const symbolHash = hashSymbol(storedSymbol);
-      const filter = { userId: pos.userId, symbolHash, tradingDate };
+      const symbolHash = createBlindIndex(storedSymbol);
 
       let totalValueUSD = null;
       let totalValueBRL = null;
@@ -229,39 +191,30 @@ export async function runDailySnapshot() {
         }
       }
 
-      const update = {
-        $setOnInsert: {
-          userId: pos.userId,
-          symbol: encrypt(storedSymbol), // criptografado apenas ao inserir
-          symbolHash,
-          currency: encrypt(targetCurrency),
-          tradingDate,
-          createdAt: new Date()
-        },
-        $set: {
-          closePrice: encrypt(closePrice),
-          dayChange: encrypt(dayChange),
-          dayChangePercent: encrypt(dayChangePercent),
-          updatedAt: new Date(),
-          fxUSDBRL: fxUSDBRL != null ? encrypt(fxUSDBRL) : undefined,
-          fxBRLUSD: fxUSDBRL != null && fxUSDBRL !== 0 ? encrypt(1 / fxUSDBRL) : undefined,
-          totalValueUSD: totalValueUSD != null ? encrypt(totalValueUSD) : undefined,
-          totalValueBRL: totalValueBRL != null ? encrypt(totalValueBRL) : undefined
-        }
-      };
       try {
-        const res = await Snapshot.updateOne(filter, update, { upsert: true });
-        if (res.upsertedCount === 1 || (res.upserted && res.upserted.length)) {
+        const result = await upsertSnapshotRecord({
+          userId: pos.userId,
+          symbol: encryptValue(storedSymbol),
+          symbolHash,
+          currency: encryptValue(targetCurrency),
+          tradingDate,
+          closePrice: encryptValue(closePrice),
+          dayChange: encryptValue(dayChange),
+          dayChangePercent: encryptValue(dayChangePercent),
+          updatedAt: new Date().toISOString(),
+          fxUSDBRL: fxUSDBRL != null ? encryptValue(fxUSDBRL) : null,
+          fxBRLUSD: fxUSDBRL != null && fxUSDBRL !== 0 ? encryptValue(1 / fxUSDBRL) : null,
+          totalValueUSD: totalValueUSD != null ? encryptValue(totalValueUSD) : null,
+          totalValueBRL: totalValueBRL != null ? encryptValue(totalValueBRL) : null,
+        });
+
+        if (result.inserted) {
           created++;
-        } else if (res.matchedCount >= 1) {
+        } else {
           updated++;
         }
       } catch (upErr) {
-        if (upErr.code === 11000) {
-          // corrida vencida por outra operação; ignorar
-        } else {
-          console.warn('[Snapshot] Upsert error:', upErr.message);
-        }
+        console.warn('[Snapshot] Upsert error:', upErr.message);
       }
     }
 

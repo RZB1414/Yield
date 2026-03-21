@@ -134,24 +134,10 @@ function requestBodyParser(req, res, next) {
 }
 
 // Middleware para garantir conexão com o banco em cada request (serverless friendly)
-import { dbConnection, connection } from './config/dbConnect.js';
-app.use(async (req, res, next) => {
-  if (!connection || connection.readyState !== 1) {
-    try {
-      await dbConnection();
-      console.log('Conexão com o banco restabelecida');
-    } catch (err) {
-      console.error('Erro ao conectar com o banco:', err);
-      return res.status(500).json({ aviso: 'Erro ao conectar com o banco de dados.' });
-    }
-  }
-  next();
-});
-
 app.use(cors(corsOptions));
 
 // Opcional: responder manualmente a OPTIONS para garantir CORS em serverless
-app.options('*', cors(corsOptions));
+app.options('/{*any}', cors(corsOptions));
 
 // Middleware para parsing de JSON e URL-encoded
 app.use(requestBodyParser);

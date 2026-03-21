@@ -7,3 +7,9 @@ compatibility_flags = ["nodejs_compat", "nodejs_compat_populate_process_env"]
 
 [vars]
 CORS_ALLOWED_ORIGINS = "http://localhost:3001"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "yield-db"
+database_id = "5fa60998-77f6-4087-b54f-a7e54734fd5a"
+preview_database_id = "5fa60998-77f6-4087-b54f-a7e54734fd5a"
